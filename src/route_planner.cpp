@@ -9,15 +9,15 @@ RoutePlanner::RoutePlanner(RouteModel &model, float start_x, float start_y,
   start_y *= 0.01;
   end_x *= 0.01;
   end_y *= 0.01;
-  RouteModel::Node *_start_node = new RouteModel::Node;
-  RouteModel::Node *_end_node = new RouteModel::Node;
+  //RouteModel::Node *_start_node = new RouteModel::Node;
+  //RouteModel::Node *_end_node = new RouteModel::Node;
   // Use the m_Model.FindClosestNode method to find the closest nodes to
   // the starting and ending coordinates. Store the nodes in the
   // RoutePlanner's start_node and end_node attributes.
-  *_start_node = std::move(m_Model.FindClosestNode(start_x, start_y));
-  *_end_node = std::move(m_Model.FindClosestNode(end_x, end_y));
-  start_node = _start_node;
-  end_node = _end_node;
+  start_node = &(m_Model.FindClosestNode(start_x, start_y));
+  end_node = &(m_Model.FindClosestNode(end_x, end_y));
+  //start_node = _start_node;
+  //end_node = _end_node;
 }
 
 // Implement the CalculateHValue method.
@@ -44,7 +44,7 @@ void RoutePlanner::AddNeighbors(RouteModel::Node *current_node) {
     road_current->parent = current_node;
     road_current->h_value = CalculateHValue(road_current);
     road_current->g_value = current_node->g_value + current_node->distance(*road_current);
-    open_list.push_back(road_current);
+    open_list.emplace_back(road_current);
     road_current->visited = true;
   }
 }
@@ -80,9 +80,9 @@ RoutePlanner::ConstructFinalPath(RouteModel::Node *current_node) {
   while (current_node->parent != nullptr && current_node != start_node) {
     distance += current_node->distance(*(current_node->parent));
     current_node = current_node->parent;
-    path_found.push_back(*current_node);
+    path_found.emplace_back(*current_node);
   }
-  path_found.push_back(*current_node);
+  path_found.emplace_back(*current_node);
 
   distance *= m_Model.MetricScale(); // Multiply the distance by the scale of
                                      // the map to get meters.
@@ -103,8 +103,8 @@ void RoutePlanner::AStarSearch() {
   RouteModel::Node *current_node = nullptr;
   current_node = start_node;
   current_node->visited = true;
-  open_list.push_back(current_node);
-  while((current_node->x == end_node->x && current_node->y == end_node->y)) {
+  open_list.emplace_back(current_node);
+  while((current_node->x != end_node->x && current_node->y != end_node->y) && open_list.size()) {
     AddNeighbors(current_node);
     current_node = NextNode();
   }
