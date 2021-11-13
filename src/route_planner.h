@@ -35,7 +35,7 @@ private:
    */
   static bool Compare(const RouteModel::Node *a, const RouteModel::Node *b) {
     int f1 = a->g_value + a->g_value; // f1 = g1 + h1
-    int f2 = b->g_value + b->g_value;; // f2 = g2 + h2
+    int f2 = b->g_value + b->g_value; // f2 = g2 + h2
     return f1 > f2; 
   }
 };
