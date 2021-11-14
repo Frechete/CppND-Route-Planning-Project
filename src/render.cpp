@@ -6,12 +6,14 @@ static io2d::rgba_color RoadColor(Model::Road::Type type);
 static io2d::dashes RoadDashes(Model::Road::Type type);
 static io2d::point_2d ToPoint2D(const Model::Node &node) noexcept;
 
-Render::Render(RouteModel &model) : m_Model(model) {
+Render::Render(RouteModel &model) : m_Model(model)
+{
   BuildRoadReps();
   BuildLanduseBrushes();
 }
 
-void Render::Display(io2d::output_surface &surface) {
+void Render::Display(io2d::output_surface &surface)
+{
   m_Scale = static_cast<float>(
       std::min(surface.dimensions().x(), surface.dimensions().y()));
   m_PixelsInMeter = static_cast<float>(m_Scale / m_Model.MetricScale());
@@ -31,7 +33,8 @@ void Render::Display(io2d::output_surface &surface) {
   DrawEndPosition(surface);
 }
 
-void Render::DrawPath(io2d::output_surface &surface) const {
+void Render::DrawPath(io2d::output_surface &surface) const
+{
   io2d::render_props aliased{io2d::antialias::none};
   io2d::brush foreBrush{io2d::rgba_color::orange};
   float width = 5.0f;
@@ -39,7 +42,8 @@ void Render::DrawPath(io2d::output_surface &surface) const {
                  io2d::stroke_props{width});
 }
 
-void Render::DrawEndPosition(io2d::output_surface &surface) const {
+void Render::DrawEndPosition(io2d::output_surface &surface) const
+{
   if (m_Model.path.empty())
     return;
   io2d::render_props aliased{io2d::antialias::none};
@@ -61,7 +65,8 @@ void Render::DrawEndPosition(io2d::output_surface &surface) const {
                  std::nullopt, std::nullopt, aliased);
 }
 
-void Render::DrawStartPosition(io2d::output_surface &surface) const {
+void Render::DrawStartPosition(io2d::output_surface &surface) const
+{
   if (m_Model.path.empty())
     return;
 
@@ -84,8 +89,10 @@ void Render::DrawStartPosition(io2d::output_surface &surface) const {
                  std::nullopt, std::nullopt, aliased);
 }
 
-void Render::DrawBuildings(io2d::output_surface &surface) const {
-  for (auto &building : m_Model.Buildings()) {
+void Render::DrawBuildings(io2d::output_surface &surface) const
+{
+  for (auto &building : m_Model.Buildings())
+  {
     auto path = PathFromMP(building);
     surface.fill(m_BuildingFillBrush, path);
     surface.stroke(m_BuildingOutlineBrush, path, std::nullopt,
@@ -93,8 +100,10 @@ void Render::DrawBuildings(io2d::output_surface &surface) const {
   }
 }
 
-void Render::DrawLeisure(io2d::output_surface &surface) const {
-  for (auto &leisure : m_Model.Leisures()) {
+void Render::DrawLeisure(io2d::output_surface &surface) const
+{
+  for (auto &leisure : m_Model.Leisures())
+  {
     auto path = PathFromMP(leisure);
     surface.fill(m_LeisureFillBrush, path);
     surface.stroke(m_LeisureOutlineBrush, path, std::nullopt,
@@ -102,22 +111,26 @@ void Render::DrawLeisure(io2d::output_surface &surface) const {
   }
 }
 
-void Render::DrawWater(io2d::output_surface &surface) const {
+void Render::DrawWater(io2d::output_surface &surface) const
+{
   for (auto &water : m_Model.Waters())
     surface.fill(m_WaterFillBrush, PathFromMP(water));
 }
 
-void Render::DrawLanduses(io2d::output_surface &surface) const {
+void Render::DrawLanduses(io2d::output_surface &surface) const
+{
   for (auto &landuse : m_Model.Landuses())
     if (auto br = m_LanduseBrushes.find(landuse.type);
         br != m_LanduseBrushes.end())
       surface.fill(br->second, PathFromMP(landuse));
 }
 
-void Render::DrawHighways(io2d::output_surface &surface) const {
+void Render::DrawHighways(io2d::output_surface &surface) const
+{
   auto ways = m_Model.Ways().data();
   for (auto road : m_Model.Roads())
-    if (auto rep_it = m_RoadReps.find(road.type); rep_it != m_RoadReps.end()) {
+    if (auto rep_it = m_RoadReps.find(road.type); rep_it != m_RoadReps.end())
+    {
       auto &rep = rep_it->second;
       auto &way = ways[road.way];
       auto width =
@@ -127,9 +140,11 @@ void Render::DrawHighways(io2d::output_surface &surface) const {
     }
 }
 
-void Render::DrawRailways(io2d::output_surface &surface) const {
+void Render::DrawRailways(io2d::output_surface &surface) const
+{
   auto ways = m_Model.Ways().data();
-  for (auto &railway : m_Model.Railways()) {
+  for (auto &railway : m_Model.Railways())
+  {
     auto &way = ways[railway.way];
     auto path = PathFromWay(way);
     surface.stroke(m_RailwayStrokeBrush, path, std::nullopt,
@@ -140,7 +155,8 @@ void Render::DrawRailways(io2d::output_surface &surface) const {
   }
 }
 
-io2d::interpreted_path Render::PathLine() const {
+io2d::interpreted_path Render::PathLine() const
+{
   if (m_Model.path.empty())
     return {};
 
@@ -156,7 +172,8 @@ io2d::interpreted_path Render::PathLine() const {
   return io2d::interpreted_path{pb};
 }
 
-io2d::interpreted_path Render::PathFromWay(const Model::Way &way) const {
+io2d::interpreted_path Render::PathFromWay(const Model::Way &way) const
+{
   if (way.nodes.empty())
     return {};
 
@@ -170,14 +187,16 @@ io2d::interpreted_path Render::PathFromWay(const Model::Way &way) const {
   return io2d::interpreted_path{pb};
 }
 
-io2d::interpreted_path Render::PathFromMP(const Model::Multipolygon &mp) const {
+io2d::interpreted_path Render::PathFromMP(const Model::Multipolygon &mp) const
+{
   const auto nodes = m_Model.Nodes().data();
   const auto ways = m_Model.Ways().data();
 
   auto pb = io2d::path_builder{};
   pb.matrix(m_Matrix);
 
-  auto commit = [&](const Model::Way &way) {
+  auto commit = [&](const Model::Way &way)
+  {
     if (way.nodes.empty())
       return;
     pb.new_figure(ToPoint2D(nodes[way.nodes.front()]));
@@ -194,12 +213,14 @@ io2d::interpreted_path Render::PathFromMP(const Model::Multipolygon &mp) const {
   return io2d::interpreted_path{pb};
 }
 
-void Render::BuildRoadReps() {
+void Render::BuildRoadReps()
+{
   using R = Model::Road;
-  auto types = {R::Motorway,  R::Trunk,        R::Primary,
-                R::Secondary, R::Tertiary,     R::Residential,
-                R::Service,   R::Unclassified, R::Footway};
-  for (auto type : types) {
+  auto types = {R::Motorway, R::Trunk, R::Primary,
+                R::Secondary, R::Tertiary, R::Residential,
+                R::Service, R::Unclassified, R::Footway};
+  for (auto type : types)
+  {
     auto &rep = m_RoadReps[type];
     rep.brush = io2d::brush{RoadColor(type)};
     rep.metric_width = RoadMetricWidth(type);
@@ -207,7 +228,8 @@ void Render::BuildRoadReps() {
   }
 }
 
-void Render::BuildLanduseBrushes() {
+void Render::BuildLanduseBrushes()
+{
   m_LanduseBrushes.insert_or_assign(
       Model::Landuse::Commercial, io2d::brush{io2d::rgba_color{233, 195, 196}});
   m_LanduseBrushes.insert_or_assign(
@@ -226,8 +248,10 @@ void Render::BuildLanduseBrushes() {
       io2d::brush{io2d::rgba_color{209, 209, 209}});
 }
 
-static float RoadMetricWidth(Model::Road::Type type) {
-  switch (type) {
+static float RoadMetricWidth(Model::Road::Type type)
+{
+  switch (type)
+  {
   case Model::Road::Motorway:
     return 6.f;
   case Model::Road::Trunk:
@@ -251,8 +275,10 @@ static float RoadMetricWidth(Model::Road::Type type) {
   }
 }
 
-static io2d::rgba_color RoadColor(Model::Road::Type type) {
-  switch (type) {
+static io2d::rgba_color RoadColor(Model::Road::Type type)
+{
+  switch (type)
+  {
   case Model::Road::Motorway:
     return io2d::rgba_color{226, 122, 143};
   case Model::Road::Trunk:
@@ -276,11 +302,13 @@ static io2d::rgba_color RoadColor(Model::Road::Type type) {
   }
 }
 
-static io2d::dashes RoadDashes(Model::Road::Type type) {
+static io2d::dashes RoadDashes(Model::Road::Type type)
+{
   return type == Model::Road::Footway ? io2d::dashes{0.f, {1.f, 2.f}}
                                       : io2d::dashes{};
 }
 
-static io2d::point_2d ToPoint2D(const Model::Node &node) noexcept {
+static io2d::point_2d ToPoint2D(const Model::Node &node) noexcept
+{
   return io2d::point_2d(static_cast<float>(node.x), static_cast<float>(node.y));
 }
