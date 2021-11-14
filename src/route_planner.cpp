@@ -41,7 +41,7 @@ void RoutePlanner::AddNeighbors(RouteModel::Node *current_node) {
     road_current->parent = current_node;
     road_current->h_value = CalculateHValue(road_current);
     road_current->g_value =
-        current_node->g_value + current_node->distance(*road_current);
+        current_node->g_value + road_current->distance(*current_node);
     open_list.emplace_back(road_current);
     road_current->visited = true;
   }
@@ -76,7 +76,7 @@ RoutePlanner::ConstructFinalPath(RouteModel::Node *current_node) {
   std::vector<RouteModel::Node> path_found;
 
   while (current_node->parent != nullptr && current_node != start_node) {
-    distance += current_node->distance(*(current_node->parent));
+    distance += current_node->distance(*current_node->parent);
     current_node = current_node->parent;
     path_found.emplace_back(*current_node);
   }
@@ -102,7 +102,7 @@ void RoutePlanner::AStarSearch() {
   current_node = start_node;
   current_node->visited = true;
   open_list.emplace_back(current_node);
-  while (current_node->x != end_node->x && current_node->y != end_node->y) {
+  while (current_node != end_node && !open_list.empty()) {
     AddNeighbors(current_node);
     current_node = NextNode();
   }
