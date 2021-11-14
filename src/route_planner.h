@@ -1,5 +1,5 @@
-#ifndef ROUTE_PLANNER_H
-#define ROUTE_PLANNER_H
+#ifndef SRC_ROUTE_PLANNER_H_
+#define SRC_ROUTE_PLANNER_H_
 
 #include "route_model.h"
 #include <iostream>
@@ -7,9 +7,9 @@
 #include <vector>
 
 class RoutePlanner {
-public:
-  RoutePlanner(RouteModel &model, float start_x, float start_y, float end_x,
-               float end_y);
+ public:
+  RoutePlanner(RouteModel &model, float start_x, float start_y,
+               float end_x, float end_y);
   // Add public variables or methods declarations here.
   float GetDistance() const { return distance; }
   void AStarSearch();
@@ -21,7 +21,7 @@ public:
   std::vector<RouteModel::Node> ConstructFinalPath(RouteModel::Node *);
   RouteModel::Node *NextNode();
 
-private:
+ private:
   // Add private variables or methods declarations here.
   std::vector<RouteModel::Node *> open_list;
   RouteModel::Node *start_node;
@@ -29,8 +29,6 @@ private:
 
   float distance = 0.0f;
   RouteModel &m_Model;
-
-
 };
 
-#endif
+#endif  // SRC_ROUTE_PLANNER_H_

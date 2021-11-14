@@ -57,7 +57,6 @@ int main(int argc, const char **argv) {
   std::cout << "Add final coordinates x y in meters. \n";
   std::cin >> end_x >> end_y;
 
-
   // Build Model.
   RouteModel model{osm_data};
 
